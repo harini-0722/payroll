@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://payroll-wd80.onrender.com"></script>
+</head>
+<body class="bg-blue-50 font-sans">
+
+<!-- Header -->
+<!-- Header -->
+<header class="relative bg-white shadow-md p-4 flex justify-between items-center">
+  <!-- Logo -->
+  <div class="flex items-center gap-3">
+    <img src="company_logo.jpg" alt="Padmasini Innovations Logo" class="h-12 w-auto object-contain">
+  </div>
+
+  <!-- Centered Heading -->
+  <h1 class="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold text-blue-700">
+    PAYROLL MANAGEMENT SYSTEM
+  </h1>
+
+  <!-- Right side -->
+  <div class="flex items-center gap-4">
+    <p class="text-gray-700 font-semibold">Admin</p>
+    <div class="w-10 h-10 bg-indigo-600 text-white flex items-center justify-center rounded-full">👤</div>
+  </div>
+</header>
+
+
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="w-72 bg-white shadow-xl rounded-r-3xl p-6 flex flex-col justify-between">
+    <div>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-blue-600 text-white flex items-center justify-center rounded-full font-bold text-xl">PI</div>
+        <h2 class="text-xl font-bold text-blue-700">Admin Panel</h2>
+      </div>
+      <nav class="space-y-4">
+        <button data-tab="home" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="home" class="text-blue-600"></i> Home</button>
+        <button data-tab="employees" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="users" class="text-blue-600"></i> Employees</button>
+        <button data-tab="attendance" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="clock" class="text-blue-600"></i> Attendance</button>
+        <button data-tab="leaves" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="calendar-check-2" class="text-blue-600"></i> Leaves</button>
+        <button data-tab="payroll" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="wallet" class="text-blue-600"></i> Payroll</button>
+        <button data-tab="holidayCalendar" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 shadow hover:shadow-lg"><i data-lucide="calendar-check-2" class="text-blue-600"></i> Holiday Calendar</button>
+        <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-100 text-red-600 shadow hover:shadow-lg"><i data-lucide="log-out"></i> Logout</button>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 space-y-8">
+    <div id="welcomeMessage" class="text-2xl font-bold text-blue-700 p-4 opacity-0 -translate-y-5">
+      👋 Welcome back, Admin!
+    </div>
+
+    <!-- Home Stats -->
+    <section id="home" class="card hidden">
+      <div class="grid md:grid-cols-4 gap-6">
+        <!-- Employees -->
+        <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-3xl shadow-xl p-6 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
+          <div class="absolute -top-4 -right-4 w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-lg">
+            <i data-lucide="users"></i>
+          </div>
+          <h3 class="text-lg font-semibold">Employees</h3>
+          <p class="text-3xl font-bold mt-2" id="statEmployees">-</p>
+        </div>
+
+        <!-- Present Today -->
+        <div class="relative bg-gradient-to-br from-green-400 to-emerald-600 text-white rounded-3xl shadow-xl p-6 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
+          <div class="absolute -top-4 -right-4 w-12 h-12 bg-white text-green-600 rounded-full flex items-center justify-center shadow-lg">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <h3 class="text-lg font-semibold">Present Today</h3>
+          <p class="text-3xl font-bold mt-2" id="statPresent">-</p>
+        </div>
+
+        <!-- Absent Today -->
+        <div class="relative bg-gradient-to-br from-rose-400 to-red-600 text-white rounded-3xl shadow-xl p-6 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
+          <div class="absolute -top-4 -right-4 w-12 h-12 bg-white text-red-600 rounded-full flex items-center justify-center shadow-lg">
+            <i data-lucide="x-circle"></i>
+          </div>
+          <h3 class="text-lg font-semibold">Absent Today</h3>
+          <p class="text-3xl font-bold mt-2" id="statAbsent">-</p>
+        </div>
+
+        <!-- Half Day  -->
+        <!-- Half Day -->
+<div class="relative bg-gradient-to-br from-yellow-400 to-amber-600 text-white rounded-3xl shadow-xl p-6 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
+  <div class="absolute -top-4 -right-4 w-12 h-12 bg-white text-yellow-600 rounded-full flex items-center justify-center shadow-lg">
+    <i data-lucide="lightbulb"></i>
+  </div>
+  <h3 class="text-lg font-semibold">Half Day</h3>
+  <p class="text-3xl font-bold mt-2" id="statHalfDay">-</p> <!-- added ID -->
+</div>
+
+    </section>
+ <!-- Employee -->
+ <section id="employees" class="card hidden">
+  <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl shadow-md p-6 space-y-6 max-w-6xl mx-auto transform transition-all hover:scale-[1.01] hover:shadow-lg">
+
+    <!-- Employee Form -->
+    <form id="empForm" class="grid md:grid-cols-6 gap-4 items-end bg-white rounded-2xl p-4 shadow-inner animate-fadeIn">
+      <input placeholder="Username" name="username" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+      <input placeholder="Password" name="password" type="password" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+      <input placeholder="Full Name" name="full_name" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+
+      <select name="gender" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+        <option value="">Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+
+      <input placeholder="Email" name="email" type="email" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+      <input placeholder="Department" name="department" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all">
+      <input placeholder="Base Salary" name="salary" type="number" class="px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 shadow-sm hover:shadow-md transition-all md:col-span-2">
+
+      <button class="px-6 py-2 md:col-span-2 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform">
+        Add Employee
+      </button>
+      <span id="empMsg" class="md:col-span-4 text-sm font-medium text-gray-700"></span>
+    </form>
+
+    <!-- Employee Table -->
+    <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-inner bg-white animate-fadeIn mt-4">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-indigo-100 text-indigo-700 font-semibold uppercase">
+          <tr>
+            <th class="p-3 text-left">Username</th>
+            <th class="p-3 text-left">Full Name</th>
+            <th class="p-3 text-left">Gender</th>
+            <th class="p-3 text-left">Email</th>
+            <th class="p-3 text-left">Department</th>
+            <th class="p-3 text-left">Salary</th>
+            <th class="p-3 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="employeeTable" class="bg-white divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  table tr:hover {
+    background-color: #e0f2fe; /* subtle hover effect */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+
+<!-- Attendance -->
+<!-- Attendance -->
+<section id="attendance" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-md p-6 space-y-6 max-w-6xl mx-auto transform transition-all hover:scale-[1.01] hover:shadow-lg">
+
+    <div class="flex flex-wrap items-end gap-4">
+      <div>
+        <label class="text-sm text-gray-700 font-medium">Date</label>
+        <input id="attDate" type="date" class="mt-1 px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 shadow-sm hover:shadow-md transition-all">
+      </div>
+      <button id="loadAttBtn" class="px-6 py-3 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
+        Load
+      </button>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-gray-200 mt-6 p-2 shadow-inner bg-white animate-fadeIn">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-blue-100 text-blue-700 font-semibold uppercase">
+          <tr>
+            <th class="p-3 text-left">Employee</th>
+            <th class="p-3 text-left">Date</th>
+            <th class="p-3 text-left">In</th>
+            <th class="p-3 text-left">Out</th>
+            <th class="p-3 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody id="adminAttTable" class="bg-white divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  table tr:hover {
+    background-color: #dbeafe; /* light blue hover */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+
+<!-- Leaves -->
+<section id="leaves" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-md p-4 overflow-auto max-w-6xl mx-auto transform transition-all hover:scale-[1.01] hover:shadow-lg">
+
+    <h2 class="text-lg font-bold text-blue-700 mb-3 text-center">Employee Leave Requests</h2>
+
+    <div class="overflow-hidden rounded-xl border border-gray-200 shadow-inner bg-white animate-fadeIn">
+      <table class="min-w-full text-sm border-collapse">
+        <thead class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 uppercase text-xs tracking-wide">
+          <tr>
+            <th class="px-3 py-2 border-r border-gray-200 text-left">Employee</th>
+            <th class="px-3 py-2 border-r border-gray-200 text-left">Dates</th>
+            <th class="px-3 py-2 border-r border-gray-200 text-left">Type</th>
+            <th class="px-3 py-2 border-r border-gray-200 text-left">Reason</th>
+            <th class="px-3 py-2 border-r border-gray-200 text-left">Status</th>
+            <th class="px-3 py-2 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leavesTable" class="divide-y divide-gray-100 bg-white">
+          <!-- rows injected dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  /* subtle row hover effect */
+  #leavesTable tr:hover {
+    background-color: #e0f2fe; /* light blue */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+
+<script src="leaves.js"></script>
+
+<!-- Payroll -->
+<section id="payroll" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-md p-6 space-y-4 overflow-auto max-w-6xl mx-auto transform transition-all hover:scale-[1.01] hover:shadow-lg">
+
+    <div class="flex items-end gap-4 mb-4">
+      <div>
+        <label class="text-sm text-gray-700 font-medium">Month</label>
+        <input id="procMonth" type="month"
+          class="mt-1 px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+
+      <button id="processBtn"
+        class="px-6 py-3 bg-gradient-to-r from-emerald-400 to-green-500 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
+        Process Payroll
+      </button>
+
+      <button id="loadPayrollBtn"
+        class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
+        Load Payroll
+      </button>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl shadow-inner animate-fadeIn">
+      <table class="min-w-full text-sm border-collapse border border-gray-300 rounded-lg overflow-hidden">
+        <thead class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 font-semibold">
+          <tr>
+            <th class="p-2 border text-center">Employee ID</th>
+            <th class="p-2 border text-left">Name</th>
+            <th class="p-2 border text-right">Gross Salary (₹)</th>
+            <th class="p-2 border text-center">Absences</th>
+            <th class="p-2 border text-center">Half-Days</th>
+            <th class="p-2 border text-center">Non-Deduct Leaves</th>
+            <th class="p-2 border text-right">Deductions (₹)</th>
+            <th class="p-2 border text-right">Net Salary (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="payrollTable" class="divide-y divide-gray-200 bg-white">
+          <!-- rows injected dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  /* subtle row hover effect */
+  #payrollTable tr:hover {
+    background-color: #e0f2fe; /* light blue hover */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+
+
+    <!-- Holiday Calendar -->
+ <!-- Holiday Calendar -->
+<section id="holidayCalendar" class="card">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-md p-6 space-y-4 overflow-auto max-w-6xl mx-auto transform transition-all hover:scale-[1.01] hover:shadow-lg">
+
+    <h2 class="text-xl font-bold text-blue-700 mb-4 text-center">Holiday Calendar</h2>
+
+    <!-- Form to add holiday -->
+    <div class="flex flex-wrap gap-3 items-end mb-4">
+      <div>
+        <label class="block text-gray-700 font-semibold">Holiday Date</label>
+        <input type="date" id="holidayDate"
+          class="mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold">Holiday Name</label>
+        <input type="text" id="holidayName" placeholder="Holiday Name"
+          class="mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+      <button id="addHolidayBtn"
+        class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 text-white font-semibold hover:shadow-lg hover:scale-105 transition-transform">
+        Add Holiday
+      </button>
+    </div>
+
+    <!-- Dynamic table -->
+    <div class="overflow-x-auto rounded-xl shadow-inner animate-fadeIn">
+      <table class="min-w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
+        <thead class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 font-semibold text-left">
+          <tr>
+            <th class="p-2 border-r border-gray-300">ID</th>
+            <th class="p-2 border-r border-gray-300">Date</th>
+            <th class="p-2 border-r border-gray-300">Holiday</th>
+            <th class="p-2">Weekday</th>
+            <th class="p-2 border-r border-gray-300">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="holidayTbody" class="bg-white divide-y divide-gray-200">
+          <!-- Holidays will be populated here via JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  /* Subtle row hover */
+  #holidayTbody tr:hover {
+    background-color: #e0f2fe; /* light blue */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+<script src="/leaves.js"></script>
+
+
+
+
+<script>
+lucide.createIcons();
+
+// Tabs
+const tabs = document.querySelectorAll('.tab');
+const cards = document.querySelectorAll('.card');
+function showTab(id){ cards.forEach(c=>c.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+tabs.forEach(btn=>btn.addEventListener('click', ()=> showTab(btn.dataset.tab)));
+showTab('home');
+
+// Guard
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  if(!d.user){ location.href = '/'; return;}
+  if(d.user.role!=='admin'){ location.href='/employee-dashboard.html'; return;}
+  loadStats(); loadEmployees(); loadLeaves();
+});
+
+// Stats
+async function loadStats(){
+  const today = new Date().toISOString().slice(0,10);
+
+  const [empsRes, attRes] = await Promise.all([
+    fetch('https://payroll-wd80.onrender.com/api/admin/employees'), 
+    fetch('https://payroll-wd80.onrender.com/api/admin/attendance?date='+today)
+  ]);
+
+  const emps = await empsRes.json();
+  const att = await attRes.json();
+
+  const present = att.filter(a => a.status === 'Present').length;
+  const halfDay = att.filter(a => a.status === 'Half Day').length;
+
+  document.getElementById('statEmployees').textContent = emps.length;
+  document.getElementById('statPresent').textContent = present;
+  document.getElementById('statAbsent').textContent = Math.max(0, emps.length - present - halfDay);
+  document.getElementById('statHalfDay').textContent = halfDay;
+}
+
+// Employees
+const empForm = document.getElementById('empForm');
+
+async function submitEmpForm(e){
+  e.preventDefault();
+  const form = empForm;
+
+  const data = {
+    username: form.username.value,
+    password: form.password.value,
+    full_name: form.full_name.value,
+    gender: form.gender.value || 'male',
+    email: form.email.value,
+    department: form.department.value,
+    salary: parseFloat(form.salary.value) || 0
+  };
+
+  const isUpdate = !!form.dataset.editing;
+  let url = '/api/admin/employees';
+  let method = 'POST';
+  if(isUpdate){ 
+    url += '/' + form.dataset.editing; 
+    method = 'PUT'; 
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  const result = await res.json();
+  const msg = document.getElementById('empMsg');
+
+  if(result.ok){
+    msg.textContent = isUpdate ? 'Employee updated ✅' : 'Employee added ✅';
+    msg.className = 'md:col-span-2 text-green-600';
+
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+
+    form.reset();
+    delete form.dataset.editing;
+    document.querySelector('#empForm button').textContent = "Add Employee";
+    loadEmployees();
+  } else {
+    msg.textContent = result.error || 'Error saving employee';
+    msg.className = 'md:col-span-2 text-red-600';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  }
+}
+
+// Attach event listener **outside** the function
+empForm.addEventListener('submit', submitEmpForm);
+
+
+// Load Employees
+async function loadEmployees(){
+  const res = await fetch('https://payroll-wd80.onrender.com/api/admin/employees'); 
+  const list = await res.json();
+  const tb = document.getElementById('employeeTable'); 
+  tb.innerHTML = '';
+
+  list.forEach(e=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+  <td class="p-2">${e.Username}</td>
+  <td class="p-2">${e.Name}</td>
+  <td class="p-2">${e.Gender || '-'}</td>
+  <td class="p-2">${e.Email || '-'}</td>
+  <td class="p-2">${e.Department || '-'}</td>
+  <td class="p-2">₹${e.Salary ?? 0}</td>
+  <td class="p-2 space-x-2">
+    <button data-username="${e.Username}" 
+      class="edit px-4 py-1 rounded-full bg-green-100 text-green-700 font-semibold hover:bg-green-200 hover:scale-105 transition-all">
+      Edit
+    </button>
+    <button data-username="${e.Username}" 
+      class="del px-4 py-1 rounded-full bg-red-100 text-red-700 font-semibold hover:bg-red-200 hover:scale-105 transition-all">
+      Delete
+    </button>
+  </td>`;
+
+    tb.appendChild(tr);
+  });
+
+  // Edit buttons
+  document.querySelectorAll('.edit').forEach(b => b.onclick = async () => {
+    const username = b.dataset.username;
+    const res = await fetch('https://payroll-wd80.onrender.com/api/admin/employees/' + username);
+    const emp = await res.json();
+
+    if(emp && !emp.error){
+      empForm.username.value = emp.username;
+      empForm.full_name.value = emp.full_name;
+      empForm.gender.value = emp.gender || 'male';
+      empForm.email.value = emp.email;
+      empForm.department.value = emp.department;
+      empForm.salary.value = emp.salary;
+
+      empForm.dataset.editing = emp.username;
+      document.querySelector('#empForm button').textContent = "Update Employee";
+    } else {
+      alert(emp.error || "Employee not found");
+    }
+  });
+
+  // Delete buttons
+  document.querySelectorAll('.del').forEach(b => b.onclick = async () => {
+    if(!confirm('Delete this employee?')) return;
+    const username = b.dataset.username;
+    const r = await fetch('https://payroll-wd80.onrender.com/api/admin/employees/' + username, { method:'DELETE' });
+    const d = await r.json();
+    if(d.ok) loadEmployees();
+    else alert(d.error || 'Error deleting employee');
+  });
+}
+
+// Load employees initially
+loadEmployees();
+document.getElementById('loadAttBtn').onclick = async () => {
+  const date = document.getElementById('attDate').value;
+  const r = await fetch('https://payroll-wd80.onrender.com/api/admin/attendance' + (date ? `?date=${date}` : ''));
+  const list = await r.json();
+  const tb = document.getElementById('adminAttTable'); 
+  tb.innerHTML = '';
+
+  if(list.length === 0) {
+    tb.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No attendance found</td></tr>`;
+    return;
+  }
+
+  const fmt = t => t ? t.slice(0,5) : '-';
+
+  list.forEach(a => {
+    const statusColor = a.status === 'Present' ? 'text-green-600' 
+                       : a.status === 'Absent' ? 'text-red-600' 
+                       : a.status === 'Leave' ? 'text-yellow-600' 
+                       : 'text-gray-600';
+
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 transition-colors';
+    tr.innerHTML = `
+      <td class="p-2">${a.full_name}</td>
+      <td class="p-2">${a.date}</td>
+      <td class="p-2">${fmt(a.time_in)}</td>
+      <td class="p-2">${fmt(a.time_out)}</td>
+      <td class="p-2 font-semibold ${statusColor}">${a.status||'-'}</td>
+    `;
+    tb.appendChild(tr);
+  });
+};
+
+
+// Leaves
+// Helper function to format date as DD-MM-YYYY
+function formatDate(d) {
+  const date = new Date(d);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+async function loadLeaves() {
+  try {
+    const r = await fetch('https://payroll-wd80.onrender.com/api/admin/leaves');
+    const list = await r.json();
+    const tb = document.getElementById('leavesTable');
+    tb.innerHTML = '';
+
+    list.forEach(l => {
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-gray-50 transition";
+
+      tr.innerHTML = `
+        <td class="px-3 py-2 font-semibold text-gray-600 border-r border-gray-200">${l.full_name}</td>
+        <td class="px-3 py-2 font-semibold text-gray-600 border-r border-gray-200">${formatDate(l.start_date)} → ${formatDate(l.end_date)}</td>
+        <td class="px-3 py-2 font-semibold text-gray-600 border-r border-gray-200">${l.type}</td>
+        <td class="px-3 py-2 font-semibold text-gray-600 border-r border-gray-200">${l.reason || '-'}</td>
+        <td class="px-3 py-2 font-semibold border-r border-gray-200">
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+            ${l.status === 'Approved' ? 'bg-green-50 text-green-700' :
+              l.status === 'Rejected' ? 'bg-red-50 text-red-700' :
+              'bg-yellow-50 text-yellow-700 animate-pulse'}">
+            ${l.status}
+          </span>
+        </td>
+        <td class="px-3 py-2 text-center space-x-1">
+          <button data-id="${l.id}" 
+            class="approve inline-flex items-center justify-center px-2 py-1 rounded-md bg-gray-100
+                   text-green-600 text-sm font-semibold hover:bg-green-50 hover:scale-105 active:scale-95
+                   transition-all duration-200 ease-in-out">
+            ✅
+          </button>
+          <button data-id="${l.id}" 
+            class="reject inline-flex items-center justify-center px-2 py-1 rounded-md bg-gray-100
+                   text-red-600 text-sm font-semibold hover:bg-red-50 hover:scale-105 active:scale-95
+                   transition-all duration-200 ease-in-out">
+            ❌
+          </button>
+        </td>
+      `;
+
+      tb.appendChild(tr);
+    });
+
+    // Button actions
+    document.querySelectorAll('.approve').forEach(b => {
+      b.onclick = async () => {
+        await fetch('https://payroll-wd80.onrender.com/api/admin/leaves/' + b.dataset.id + '/approve', { method: 'POST' });
+        loadLeaves();
+      };
+    });
+
+    document.querySelectorAll('.reject').forEach(b => {
+      b.onclick = async () => {
+        await fetch('/api/admin/leaves/' + b.dataset.id + '/reject', { method: 'POST' });
+        loadLeaves();
+      };
+    });
+
+  } catch (err) {
+    console.error('Error loading leaves:', err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadLeaves);
+
+
+
+
+// =================== FRONTEND PAYROLL JS ===================
+// Process Payroll
+// Process Payroll
+document.getElementById('processBtn').onclick = async () => {
+  const month = document.getElementById('procMonth').value;
+  if (!month) return alert('Select a month');
+
+  try {
+    const res = await fetch('https://payroll-wd80.onrender.com/api/payroll/process', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ month })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+      document.getElementById('loadPayrollBtn').click();
+    } else {
+      alert(data.error || 'Error processing payroll');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error processing payroll');
+  }
+};
+
+// Load Payroll
+document.getElementById('loadPayrollBtn').onclick = async () => {
+  const month = document.getElementById('procMonth').value;
+  if (!month) return alert('Select a month');
+
+  try {
+    const res = await fetch('https://payroll-wd80.onrender.com/api/admin/payroll?month=' + month);
+    const list = await res.json();
+
+    const tb = document.getElementById('payrollTable');
+    tb.innerHTML = '';
+
+    list.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="p-2 border text-center">${p.user_id}</td>
+        <td class="p-2 border text-left">${p.full_name}</td>
+        <td class="p-2 border text-right">₹${Number(p.gross).toLocaleString()}</td>
+        <td class="p-2 border text-center">${p.total_absent_days}</td>
+        <td class="p-2 border text-center">${Number(p.total_half_days).toFixed(1)}</td>
+        <td class="p-2 border text-center">${p.total_non_deduct_leaves}</td>
+        <td class="p-2 border text-right">₹${Number(p.deductions).toLocaleString()}</td>
+        <td class="p-2 border text-right font-bold">₹${Number(p.net).toLocaleString()}</td>
+      `;
+      tb.appendChild(tr);
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Error loading payroll');
+  }
+};
+
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try { await fetch("https://payroll-wd80.onrender.com/api/auth/logout",{method:"POST"}); window.location.href="index.html"; }
+  catch(err){ console.error("Logout failed", err); }
+});
+
+// Welcome message animation
+window.addEventListener("DOMContentLoaded", () => {
+  const msg = document.getElementById("welcomeMessage");
+  msg.style.transition = "all 1s ease-out";
+  msg.style.opacity = "1";
+  msg.style.transform = "translateY(0)";
+});
+
+// Format date as DD-MM-YYYY
+function fmtDate(d) {
+  const dt = new Date(d);
+  const day = String(dt.getDate()).padStart(2, '0');
+  const month = String(dt.getMonth() + 1).padStart(2, '0');
+  const year = dt.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+// Load holidays from DB and display in table
+async function loadHolidays() {
+  try {
+    const res = await fetch('https://payroll-wd80.onrender.com/api/holidays');
+    if (!res.ok) throw new Error('Failed to fetch holidays');
+
+    const holidays = await res.json();
+    const tbody = document.getElementById('holidayTbody');
+    tbody.innerHTML = '';
+
+    holidays.forEach((h, index) => {
+      const tr = document.createElement('tr');
+      tr.classList.add('border-b', 'border-gray-200');
+
+      tr.innerHTML = `
+        <td class="p-2 border-r border-gray-300">${index + 1}</td>
+        <td class="p-2 border-r border-gray-300">${fmtDate(h.holiday_date)}</td>
+        <td class="p-2 border-r border-gray-300">${h.name}</td>
+        <td class="p-2 border-r border-gray-300">${h.weekday}</td>
+        <td class="p-2">
+          <button 
+            class="px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 transition"
+            onclick="deleteHoliday(${h.id})"
+          >
+            Delete
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Load Holidays Error:', err);
+    alert('Error loading holidays');
+  }
+}
+
+// Add new holiday
+async function addHoliday() {
+  const dateInput = document.getElementById('holidayDate').value;
+  const nameInput = document.getElementById('holidayName').value.trim();
+  if (!dateInput || !nameInput) {
+    alert('Enter both date and name');
+    return;
+  }
+
+  const weekday = new Date(dateInput).toLocaleDateString('en-GB', { weekday: 'long' });
+
+  try {
+    const res = await fetch('https://payroll-wd80.onrender.com/api/holidays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ holiday_date: dateInput, name: nameInput, weekday })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add holiday');
+
+    document.getElementById('holidayDate').value = '';
+    document.getElementById('holidayName').value = '';
+    await loadHolidays();
+  } catch (err) {
+    console.error('Add Holiday Error:', err);
+    alert('Error adding holiday: ' + err.message);
+  }
+}
+
+// Delete a holiday by ID
+async function deleteHoliday(id) {
+  if (!confirm('Are you sure you want to delete this holiday?')) return;
+
+  try {
+    const res = await fetch(`https://payroll-wd80.onrender.com/api/holidays/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete holiday');
+
+    await loadHolidays();
+  } catch (err) {
+    console.error('Delete Holiday Error:', err);
+    alert('Error deleting holiday: ' + err.message);
+  }
+}
+
+document.getElementById('addHolidayBtn').addEventListener('click', addHoliday);
+window.addEventListener('DOMContentLoaded', loadHolidays);
+
+
+</script>
+
+</body>
+</html>

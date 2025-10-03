@@ -1,0 +1,521 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://payroll-wd80.onrender.com"></script>
+</head>
+<body class="bg-blue-50 font-sans">
+
+<!-- Header -->
+<!-- Header -->
+<header class="relative bg-white shadow-md p-4 flex justify-between items-center">
+  <!-- Logo -->
+  <div class="flex items-center gap-3">
+    <img src="company_logo.jpg" alt="Padmasini Innovations Logo" class="h-12 w-auto object-contain">
+  </div>
+
+  <!-- Centered Heading -->
+  <h1 class="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold text-blue-700">
+    PAYROLL MANAGEMENT SYSTEM
+  </h1>
+
+  <!-- Right side -->
+  <div class="flex items-center gap-4">
+    <p class="text-gray-700 font-semibold">Employee</p>
+    <div class="w-10 h-10 bg-indigo-600 text-white flex items-center justify-center rounded-full">👤</div>
+  </div>
+</header>
+
+
+
+<div class="flex min-h-screen">
+
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg rounded-r-3xl p-6">
+    <nav class="space-y-4">
+      <button data-tab="home" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 transition-shadow shadow hover:shadow-lg"><i data-lucide="home" class="text-blue-600"></i> Home</button>
+      <button data-tab="attendance" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 transition-shadow shadow hover:shadow-lg"><i data-lucide="clock" class="text-blue-600"></i> Attendance</button>
+      <button data-tab="leave" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 transition-shadow shadow hover:shadow-lg"><i data-lucide="calendar-days" class="text-blue-600"></i> Leaves</button>
+      <button data-tab="salary" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 transition-shadow shadow hover:shadow-lg"><i data-lucide="wallet" class="text-blue-600"></i> Salary</button>
+      <button data-tab="profile" class="tab w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-100 transition-shadow shadow hover:shadow-lg"><i data-lucide="user" class="text-blue-600"></i> My Profile</button>
+      <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-100 text-red-600 transition-shadow shadow hover:shadow-lg"><i data-lucide="log-out"></i> Logout</button>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-8 space-y-8">
+
+    <!-- Home -->
+  <!-- Home Section -->
+<section id="home" class="card hidden">
+  <div class="welcome-container">
+    <h1 class="welcome-text">
+      👋 Welcome, <span id="empName"></span>
+    </h1>
+    <p class="welcome-subtext">
+      Use the left menu to manage attendance, leave requests, view salary details, and update your profile.
+    </p>
+  </div>
+</section>
+
+<!-- Animation Styles -->
+<style>
+/* Container fade + scale */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Gradient animated text */
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.welcome-container {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  animation: fadeUp 1s ease-out forwards;
+  text-align: center;
+}
+
+.welcome-text {
+  font-size: 2.2rem;
+  font-weight: bold;
+  background: linear-gradient(270deg, #2563eb, #9333ea, #14b8a6);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 5s ease infinite;
+  margin-bottom: 1rem;
+}
+
+.welcome-subtext {
+  font-size: 1.1rem;
+  color: #4b5563;
+  opacity: 0;
+  animation: fadeUp 1s ease-out forwards;
+  animation-delay: 0.5s;
+}
+</style>
+
+
+    <!-- Attendance -->
+    <section id="attendance" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-2xl p-6 space-y-4 max-w-5xl mx-auto transform transition-all hover:scale-[1.02] hover:shadow-3xl">
+    
+    <h2 class="text-2xl font-bold text-blue-700 mb-2 text-center">Attendance</h2>
+    
+    <div class="flex gap-4 justify-center">
+      <button id="checkInBtn" class="px-6 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all font-semibold">
+        Check In
+      </button>
+      <button id="checkOutBtn" class="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all font-semibold">
+        Check Out
+      </button>
+    </div>
+    
+    <p id="attMsg" class="text-gray-700 text-sm"></p>
+
+    <h3 class="font-semibold text-gray-700 mt-4 mb-2 text-lg">Recent Attendance</h3>
+    
+    <div class="overflow-x-auto rounded-xl border border-gray-300 shadow-inner bg-white">
+      <table class="min-w-full text-sm text-center border-collapse">
+        <thead class="bg-blue-100 text-blue-700 font-semibold">
+          <tr>
+            <th class="px-4 py-2 border-b">Date</th>
+            <th class="px-4 py-2 border-b">Time In</th>
+            <th class="px-4 py-2 border-b">Time Out</th>
+            <th class="px-4 py-2 border-b">Working Hours</th>
+            <th class="px-4 py-2 border-b">Status</th>
+          </tr>
+        </thead>
+        <tbody id="attTable" class="divide-y divide-gray-200">
+          <!-- rows injected dynamically -->
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  #attendance {
+    animation: fadeIn 0.6s ease forwards;
+  }
+  table tr:hover {
+    background-color: #e0f2fe; /* subtle hover effect for table rows */
+    transition: background-color 0.3s ease;
+  }
+</style>
+
+
+    <!-- Leave -->
+   <section id="leave" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-2xl p-6 space-y-6 max-w-5xl mx-auto transform transition-all hover:scale-[1.02] hover:shadow-3xl">
+    
+    <!-- Title -->
+    <h2 class="text-2xl font-bold text-blue-700 mb-4 text-center">Leaves</h2>
+    
+    <!-- Leave Form -->
+    <form id="leaveForm" class="grid md:grid-cols-5 gap-4 bg-white rounded-3xl shadow-inner p-4 animate-fadeIn">
+      
+      <!-- Start Date -->
+      <div>
+        <label class="text-sm text-gray-700">Start Date</label>
+        <input type="date" name="start_date" required class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+
+      <!-- End Date -->
+      <div>
+        <label class="text-sm text-gray-700">End Date</label>
+        <input type="date" name="end_date" required class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+
+      <!-- Gender -->
+      <div>
+        <label class="text-sm text-gray-700">Gender</label>
+        <select id="genderSelect" required class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+          <option value="">-- Select --</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+
+      <!-- Leave Type -->
+      <div>
+        <label class="text-sm text-gray-700">Type</label>
+        <select id="leaveType" name="type" required class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all"></select>
+      </div>
+
+      <!-- Reason -->
+      <div>
+        <label class="text-sm text-gray-700">Reason</label>
+        <input name="reason" required placeholder="Enter reason" class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none shadow-sm hover:shadow-md transition-all">
+      </div>
+
+      <!-- Apply Button -->
+      <button class="md:col-span-5 px-6 py-3 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all mt-2 font-semibold">
+        Apply Leave
+      </button>
+
+    </form>
+
+    <!-- Status Message -->
+    <p id="leaveMsg" class="text-gray-700 text-sm"></p>
+
+    <!-- My Leave Requests -->
+    <h3 class="font-semibold text-gray-700 mt-4 text-lg">My Leave Requests</h3>
+    <div id="leaveRequests" class="space-y-2">
+      <!-- Dynamically generated leave requests will appear here -->
+    </div>
+
+  </div>
+</section>
+
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease forwards;
+  }
+</style>
+
+
+    <!-- Salary -->
+<section id="salary" class="card hidden">
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-2xl p-12 space-y-8 max-w-5xl mx-auto transform transition-all hover:scale-[1.03] hover:shadow-3xl">
+    
+    <!-- Title -->
+    <h2 class="text-4xl font-extrabold text-blue-700 mb-6 text-center">Salary Overview</h2>
+    
+    <!-- Controls -->
+    <div class="flex flex-wrap items-end gap-8 justify-center">
+      <div class="flex flex-col">
+        <label class="text-base text-gray-700 mb-2">Select Month</label>
+        <input 
+          id="salaryMonth" 
+          type="month" 
+          class="px-5 py-3 rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none transition-all shadow-sm hover:shadow-md text-lg"
+        >
+      </div>
+      <button 
+        id="loadSalaryBtn" 
+        class="px-8 py-4 bg-gradient-to-r from-blue-400 to-indigo-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-lg"
+      >
+        Load
+      </button>
+    </div>
+    
+    <!-- Salary Panel -->
+    <div 
+      id="salaryPanel" 
+      class="text-gray-700 text-base bg-white rounded-3xl p-6 shadow-inner animate-fadeIn transition-all min-h-[200px]"
+    >
+      <!-- Salary details will appear here -->
+    </div>
+  </div>
+</section>
+
+<!-- Optional Tailwind animation -->
+<style>
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease forwards;
+  }
+</style>
+
+
+
+
+    <!-- Profile -->
+<section id="profile" class="card hidden">
+  <div class="bg-gradient-to-r from-blue-200 via-indigo-200 to-white rounded-3xl shadow-2xl max-w-3xl mx-auto p-8 space-y-6
+              transform transition-all duration-500 hover:-translate-y-3 hover:scale-105 hover:shadow-3xl">
+    
+    <h2 class="text-3xl font-bold text-blue-700 text-center tracking-wide drop-shadow-sm">👤 My Profile</h2>
+    
+    <form id="profileForm" class="grid gap-5">
+      <input type="text" name="full_name" readonly placeholder="Full Name" 
+             class="w-full px-5 py-3 rounded-2xl border border-blue-300 bg-white text-blue-800 placeholder-blue-400 
+                    focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"/>
+      
+      <input type="email" name="email" readonly placeholder="Email" 
+             class="w-full px-5 py-3 rounded-2xl border border-blue-300 bg-white text-blue-800 placeholder-blue-400 
+                    focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"/>
+      
+      <input type="text" name="department" readonly placeholder="Department" 
+             class="w-full px-5 py-3 rounded-2xl border border-blue-300 bg-white text-blue-800 placeholder-blue-400 
+                    focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"/>
+      
+      <p id="profileMsg" class="text-blue-700 text-sm text-center animate-pulse"></p>
+    </form>
+    
+  </div>
+</section>
+
+
+
+
+  </main>
+</div>
+
+<script>
+lucide.createIcons();
+
+// Tabs
+const tabs = document.querySelectorAll('.tab');
+const cards = document.querySelectorAll('.card');
+function showTab(id){ cards.forEach(c=>c.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+tabs.forEach(btn=>btn.addEventListener('click', ()=> showTab(btn.dataset.tab)));
+showTab('home');
+
+// Fetch user
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  if(!d.user){ location.href = '/'; return;}
+  if(d.user.role!=='employee'){ location.href='/admin'; return;}
+  document.getElementById('empName').textContent = d.user.full_name;
+
+  // Fill profile form
+  const form = document.getElementById('profileForm');
+  form.full_name.value = d.user.full_name;
+  form.email.value = d.user.email;
+  form.department.value = d.user.department;
+  form.phone.value = d.user.phone || '';
+  form.address.value = d.user.address || '';
+  form.emergency_contact.value = d.user.emergency_contact || '';
+});
+
+// Attendance
+function calculateHours(timeIn, timeOut){
+  if(!timeIn || !timeOut) return "-";
+  const inDate = new Date(`1970-01-01T${timeIn}`);
+  const outDate = new Date(`1970-01-01T${timeOut}`);
+  const diffMs = outDate - inDate;
+  if(diffMs <= 0) return "-";
+  const hours = Math.floor(diffMs / (1000*60*60));
+  const mins = Math.floor((diffMs % (1000*60*60)) / (1000*60));
+  return `${hours}h ${mins}m`;
+}
+
+async function refreshAttendance(){
+  const res = await fetch('https://payroll-wd80.onrender.com/api/attendance/mine'); 
+  const data = await res.json();
+  const tbody = document.getElementById('attTable'); 
+  tbody.innerHTML='';
+
+  data.forEach(r=>{
+    const working = calculateHours(r.time_in, r.time_out);
+    const dateOnly = r.date ? r.date.split('T')[0] : '-';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2 border">${dateOnly}</td>
+      <td class="p-2 border">${r.time_in || '-'}</td>
+      <td class="p-2 border">${r.time_out || '-'}</td>
+      <td class="p-2 border">${working}</td>
+      <td class="p-2 border">${r.status || '-'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+refreshAttendance();
+
+document.getElementById('checkInBtn').onclick = async ()=>{
+  const now = new Date();
+  const hour = now.getHours();
+  let status = "Present";
+  if(hour >= 10 && hour < 13) status = "Half Day";
+  if(hour >= 13) status = "Absent";
+  const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkin',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({status})});
+  const d = await r.json();
+  document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked in at ${d.time_in} → ${status}` : '');
+  refreshAttendance();
+};
+
+document.getElementById('checkOutBtn').onclick = async ()=>{
+  const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkout',{method:'POST'});
+  const d = await r.json();
+  document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked out at ${d.time_out}` : '');
+  refreshAttendance();
+};
+
+// Leave
+function loadLeaveOptions(gender){
+  const leaveType = document.getElementById('leaveType');
+  leaveType.innerHTML = '';
+  if(gender === 'male'){
+    leaveType.innerHTML = `
+      <option value="monthly">Monthly Leave (Non-Deductible)</option>
+      <option value="normal">Normal Leave (Deductible)</option>
+    `;
+  } else if(gender === 'female'){
+    leaveType.innerHTML = `
+      <option value="special">Special Health Leave (Non-Deductible)</option>
+      <option value="monthly">Monthly Leave (Non-Deductible)</option>
+      <option value="normal">Normal Leave (Deductible)</option>
+    `;
+  }
+}
+
+document.getElementById('genderSelect').addEventListener('change', (e)=>{
+  loadLeaveOptions(e.target.value);
+});
+
+async function refreshLeaves(){
+  const res = await fetch('https://payroll-wd80.onrender.com/api/leave/mine');
+  const data = await res.json();
+  const tb = document.getElementById('leaveTable');
+  tb.innerHTML='';
+
+  // Helper function to format date as DD/MM/YYYY
+  function formatDate(dateStr){
+    if(!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-GB"); // e.g. 09/09/2025
+  }
+
+  data.forEach(l=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2 border text-center">${formatDate(l.start_date)} → ${formatDate(l.end_date)}</td>
+      <td class="p-2 border text-center">${l.type}</td>
+      <td class="p-2 border text-center">${l.reason || '-'}</td>
+      <td class="p-2 border text-center">${l.gender || '-'}</td>
+      <td class="p-2 border text-center">${l.status}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+refreshLeaves();
+
+document.getElementById('leaveForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+  const r = await fetch('https://payroll-wd80.onrender.com/api/leave/apply',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+  const d = await r.json();
+  document.getElementById('leaveMsg').textContent = d.error || (d.ok ? 'Leave submitted ✅' : '');
+  if(d.ok){ e.target.reset(); refreshLeaves(); }
+});
+
+// Salary
+// Salary load
+document.getElementById('loadSalaryBtn').onclick = async () => {
+  const m = document.getElementById('salaryMonth').value;
+  if (!m) return;
+
+  const r = await fetch('https://payroll-wd80.onrender.com/api/payroll/mine?month=' + m);
+  const p = await r.json();
+  const panel = document.getElementById('salaryPanel');
+
+  if (!p || !p.net) {
+    panel.innerHTML = `<p class="text-red-500 mt-2">Payroll not processed yet for ${m}.</p>`;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="grid md:grid-cols-2 gap-4 mt-4">
+      <div class="p-4 rounded-xl bg-blue-50">
+        <span class="font-semibold">Gross Salary:</span> ₹${Number(p.gross).toFixed(2)}
+      </div>
+      <div class="p-4 rounded-xl bg-blue-50">
+        <span class="font-semibold">Deductions:</span> ₹${Number(p.deductions).toFixed(2)} 
+        <br>
+        <small>(Leaves Deducted: ${p.total_unpaid_leave_days}, Absences: ${p.total_absent_days}, Half-Days: ${p.total_half_days})</small>
+      </div>
+      <div class="p-4 rounded-xl bg-green-100">
+        <span class="font-semibold">Net Pay:</span> ₹${Number(p.net).toFixed(2)}
+      </div>
+      <div class="p-4 rounded-xl bg-blue-50">
+        <span class="font-semibold">Month:</span> ${m}
+      </div>
+    </div>
+  `;
+};
+
+
+// Profile save
+document.getElementById('profileForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+  const r = await fetch('https://payroll-wd80.onrender.com/api/profile/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const d = await r.json();
+  document.getElementById('profileMsg').textContent = d.error || (d.ok ? 'Profile updated ✅' : '');
+});
+
+// Logout
+document.getElementById('logoutBtn').onclick = async ()=>{
+  await fetch('/api/logout', {method:'POST'});
+  location.href = '/';
+};
+</script>
+</body>
+</html>

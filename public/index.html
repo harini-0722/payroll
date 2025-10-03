@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padmasini Innovations | Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0a2540;
+  }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: rise 15s linear infinite;
+    background: linear-gradient(135deg, #4f9cf9, #43e97b);
+    mix-blend-mode: screen;
+  }
+
+  @keyframes rise {
+    0% { transform: translateY(100vh) scale(0.5); }
+    50% { transform: translateY(50vh) scale(1); }
+    100% { transform: translateY(-10vh) scale(0.5); }
+  }
+
+  .login-card {
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  background: rgba(234, 239, 236, 0.751); /* semi-transparent gray */
+  border: 1px solid rgba(255, 255, 255, 0.037);
+  border-radius: 2rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 15px 30px rgba(103, 103, 103, 0.3);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  animation: floatCard 6s ease-in-out infinite;
+}
+  @keyframes floatCard {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  input::placeholder { color: #e0e0e0; }
+</style>
+</head>
+<body>
+
+<!-- Bubble animation -->
+<script>
+  const bubbleCount = 25;
+  for(let i=0; i<bubbleCount; i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.style.width = b.style.height = Math.random()*80 + 30 + 'px';
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.animationDuration = 10 + Math.random()*10 + 's';
+    b.style.animationDelay = Math.random()*5 + 's';
+    document.body.appendChild(b);
+  }
+</script>
+
+<div class="login-card text-white flex flex-col gap-6">
+  <!-- Only Logo -->
+  <div class="flex items-center justify-center mb-4">
+    <img src="padmasini.logo.png" alt="Padmasini Logo" class="h-40 object-contain drop-shadow-xl">
+  </div>
+
+  <form id="loginForm" class="flex flex-col gap-4">
+    <div class="flex flex-col">
+  <label class="text-sm font-semibold text-gray-700">Username</label>
+  <input type="text" name="username" required placeholder="Enter username" 
+    class="mt-1 px-4 py-2 rounded-xl bg-gray-100 text-black placeholder-gray-500 outline-none focus:ring-2 ring-blue-400">
+</div>
+
+<div class="flex flex-col">
+  <label class="text-sm font-semibold text-gray-700">Password</label>
+  <input type="password" name="password" required placeholder="Enter password" 
+    class="mt-1 px-4 py-2 rounded-xl bg-gray-100 text-black placeholder-gray-500 outline-none focus:ring-2 ring-blue-400">
+</div>
+    <button type="submit" class="py-2 rounded-xl bg-blue-500 hover:bg-blue-600 shadow-lg transform hover:-translate-y-1 transition-all font-semibold">Sign In</button>
+    <p id="msg" class="text-black font-semibold text-sm"></p>
+  </form>
+</div>
+
+<p id="msg" class="text-black font-semibold text-sm"></p>
+
+
+<script>
+  const form = document.getElementById('loginForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
+
+    try {
+      const res = await fetch('https://payroll-wd80.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      // Show error if login fails
+      if(!data.success){
+        document.getElementById('msg').textContent = data.error;
+        return;
+      }
+
+      // Redirect based on role
+      if(data.role === 'admin') window.location.href = '/admin';
+      else window.location.href = '/employee';
+    } catch(err){
+      console.error(err);
+      document.getElementById('msg').textContent = 'Server error, try again';
+    }
+  });
+</script>
+</body>
+</html>
