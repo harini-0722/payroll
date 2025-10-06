@@ -348,102 +348,58 @@ fetch('/api/me').then(r=>r.json()).then(d=>{
   form.emergency_contact.value = d.user.emergency_contact || '';
 });
 
-// Convert "HH:mm:ss" (24-hr) to "hh:mm:ss AM/PM"
-function formatTime12Hour(time24) {
-  if (!time24) return '-';
-  const [hoursStr, minutes, seconds] = time24.split(':');
-  let hours = parseInt(hoursStr, 10);
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12; // convert 0 → 12 for 12-hour format
-  return `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-}
-
-// Calculate working hours as HH:MM:SS Hrs
-function calculateWorkingHours(timeIn, timeOut) {
-  if (!timeIn || !timeOut) return '-';
+// Attendance
+function calculateHours(timeIn, timeOut){
+  if(!timeIn || !timeOut) return "-";
   const inDate = new Date(`1970-01-01T${timeIn}`);
   const outDate = new Date(`1970-01-01T${timeOut}`);
   const diffMs = outDate - inDate;
-  if (diffMs <= 0) return '-';
-
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-  const seconds = String(totalSeconds % 60).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds} Hrs`;
+  if(diffMs <= 0) return "-";
+  const hours = Math.floor(diffMs / (1000*60*60));
+  const mins = Math.floor((diffMs % (1000*60*60)) / (1000*60));
+  return `${hours}h ${mins}m`;
 }
 
-async function refreshAttendance() {
-  try {
-    const res = await fetch('https://payroll-wd80.onrender.com/api/attendance/mine');
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
+async function refreshAttendance(){
+  const res = await fetch('https://payroll-wd80.onrender.com/api/attendance/mine'); 
+  const data = await res.json();
+  const tbody = document.getElementById('attTable'); 
+  tbody.innerHTML='';
 
-    const tbody = document.getElementById('attTable');
-    tbody.innerHTML = '';
-
-    data.forEach(r => {
-      const dateOnly = r.date ? r.date.split('T')[0] : '-';
-      const timeInFormatted = r.time_in || '-';
-      const timeOutFormatted = r.time_out || '-';
-      const workingHours = r.working_hours || '-';
-      const status = r.status || '-';
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="p-2 border">${dateOnly}</td>
-        <td class="p-2 border">${timeInFormatted}</td>
-        <td class="p-2 border">${timeOutFormatted}</td>
-        <td class="p-2 border">${workingHours}</td>
-        <td class="p-2 border">${status}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (error) {
-    console.error('Failed to refresh attendance:', error);
-  }
+  data.forEach(r=>{
+    const working = calculateHours(r.time_in, r.time_out);
+    const dateOnly = r.date ? r.date.split('T')[0] : '-';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2 border">${dateOnly}</td>
+      <td class="p-2 border">${r.time_in || '-'}</td>
+      <td class="p-2 border">${r.time_out || '-'}</td>
+      <td class="p-2 border">${working}</td>
+      <td class="p-2 border">${r.status || '-'}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-
-// Initial load
 refreshAttendance();
 
-document.getElementById('checkInBtn').onclick = async () => {
+document.getElementById('checkInBtn').onclick = async ()=>{
   const now = new Date();
   const hour = now.getHours();
   let status = "Present";
-  if (hour >= 10 && hour < 13) status = "Half Day";
-  if (hour >= 13) status = "Absent";
-
-  try {
-    const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    });
-    const d = await r.json();
-    document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked in at ${formatTime12Hour(d.time_in)} → ${status}` : '');
-    refreshAttendance();
-  } catch (err) {
-    document.getElementById('attMsg').textContent = 'Error during check-in.';
-    console.error(err);
-  }
+  if(hour >= 10 && hour < 13) status = "Half Day";
+  if(hour >= 13) status = "Absent";
+  const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkin',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({status})});
+  const d = await r.json();
+  document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked in at ${d.time_in} → ${status}` : '');
+  refreshAttendance();
 };
 
-document.getElementById('checkOutBtn').onclick = async () => {
-  try {
-    const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkout', {
-      method: 'POST'
-    });
-    const d = await r.json();
-    document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked out at ${d.time_out}` : '');
-    refreshAttendance();
-  } catch (err) {
-    document.getElementById('attMsg').textContent = 'Error during check-out.';
-    console.error(err);
-  }
+document.getElementById('checkOutBtn').onclick = async ()=>{
+  const r = await fetch('https://payroll-wd80.onrender.com/api/attendance/checkout',{method:'POST'});
+  const d = await r.json();
+  document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked out at ${d.time_out}` : '');
+  refreshAttendance();
 };
-
 
 // Leave
 function loadLeaveOptions(gender){
@@ -563,4 +519,3 @@ document.getElementById('logoutBtn').onclick = async ()=>{
 </script>
 </body>
 </html>
-

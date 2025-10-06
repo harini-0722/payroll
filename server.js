@@ -69,118 +69,38 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'adm
 app.get('/employee', (req, res) => res.sendFile(path.join(__dirname, 'public', 'employee.html')));
 
 // ====================== EMPLOYEE ROUTES ======================
-
-// Helper to convert time to 12-hour format with AM/PM
-// Helper: Convert Date object to 12-hour time with AM/PM (e.g. "02:30:45 PM")
-function formatTime12Hour(date) {
-  if (!date) return null;
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  let seconds = date.getSeconds();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
-}
-
-// ======================= CHECK-IN =======================
+// Attendance
 app.post('/api/attendance/checkin', auth, async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const today = new Date().toISOString().slice(0, 10);
-    const now = new Date();
-    const timeNow = now.toTimeString().slice(0, 8); // Store in 24-hr format
+  const userId = req.session.user.id;
+  const today = new Date().toISOString().slice(0,10);
+  const timeNow = new Date().toTimeString().slice(0,8);
 
-    // Check if already checked in today
-    const [rows] = await db.query("SELECT * FROM attendance WHERE user_id=? AND date=?", [userId, today]);
-    if (rows.length) return res.json({ error: "Already checked in" });
+  const [rows] = await db.query("SELECT * FROM attendance WHERE user_id=? AND date=?", [userId, today]);
+  if (rows.length) return res.json({ error: "Already checked in" });
 
-    // Determine status based on current hour
-    let status = "Present";
-    const hour = now.getHours();
-    if (hour >= 10 && hour < 13) status = "Half Day";
-    else if (hour >= 13) status = "Absent";
+  let status = "Present";
+  const hour = new Date().getHours();
+  if (hour >= 10 && hour < 13) status = "Half Day";
+  else if (hour >= 13) status = "Absent";
 
-    // Insert attendance record
-    await db.query(
-      "INSERT INTO attendance(user_id, date, time_in, status) VALUES (?, ?, ?, ?)",
-      [userId, today, timeNow, status]
-    );
-
-    return res.json({ ok: true, time_in: formatTime12Hour(now), status });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  await db.query("INSERT INTO attendance(user_id,date,time_in,status) VALUES(?,?,?,?)", [userId, today, timeNow, status]);
+  res.json({ ok: true });
 });
 
-// ======================= CHECK-OUT =======================
 app.post('/api/attendance/checkout', auth, async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const today = new Date().toISOString().slice(0, 10);
-    const now = new Date();
-    const timeNow = now.toTimeString().slice(0, 8);
+  const userId = req.session.user.id;
+  const today = new Date().toISOString().slice(0,10);
+  const timeNow = new Date().toTimeString().slice(0,8);
 
-    // Update attendance record for today with checkout time
-    await db.query(
-      "UPDATE attendance SET time_out=? WHERE user_id=? AND date=?",
-      [timeNow, userId, today]
-    );
-
-    return res.json({ ok: true, time_out: formatTime12Hour(now) });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  await db.query("UPDATE attendance SET time_out=? WHERE user_id=? AND date=?", [timeNow, userId, today]);
+  res.json({ ok: true });
 });
 
-// ======================= GET MY ATTENDANCE =======================
 app.get('/api/attendance/mine', auth, async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const [rows] = await db.query(
-      "SELECT * FROM attendance WHERE user_id=? ORDER BY date DESC LIMIT 20",
-      [userId]
-    );
-
-    // Map DB rows into formatted response
-    const formatted = rows.map(row => {
-      // Convert DB time (string) to Date and format 12-hr time with AM/PM
-      const timeIn = row.time_in ? formatTime12Hour(new Date(`1970-01-01T${row.time_in}`)) : null;
-      const timeOut = row.time_out ? formatTime12Hour(new Date(`1970-01-01T${row.time_out}`)) : null;
-
-      // Calculate working hours as HH:MM:SS
-      let workingHours = '';
-      if (row.time_in && row.time_out) {
-        const inTime = new Date(`1970-01-01T${row.time_in}`);
-        const outTime = new Date(`1970-01-01T${row.time_out}`);
-        const diffMs = outTime - inTime;
-        if (diffMs > 0) {
-          const totalSeconds = Math.floor(diffMs / 1000);
-          const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-          const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-          const seconds = String(totalSeconds % 60).padStart(2, '0');
-          workingHours = `${hours}:${minutes}:${seconds} Hrs`;
-        }
-      }
-
-      return {
-        date: row.date,
-        time_in: timeIn,
-        time_out: timeOut,
-        working_hours: workingHours,
-        status: row.status
-      };
-    });
-
-    return res.json(formatted);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  const userId = req.session.user.id;
+  const [rows] = await db.query("SELECT * FROM attendance WHERE user_id=? ORDER BY date DESC LIMIT 20", [userId]);
+  res.json(rows);
 });
-
-
 
 // Leave
 app.post('/api/leave/apply', auth, async (req, res) => {
