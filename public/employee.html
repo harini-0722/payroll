@@ -421,7 +421,7 @@ document.getElementById('checkInBtn').onclick = async () => {
       body: JSON.stringify({ status })
     });
     const d = await r.json();
-    document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked in at ${d.time_in} → ${status}` : '');
+    document.getElementById('attMsg').textContent = d.error || (d.ok ? `Checked in at ${formatTime12Hour(d.time_in)} → ${status}` : '');
     refreshAttendance();
   } catch (err) {
     document.getElementById('attMsg').textContent = 'Error during check-in.';
