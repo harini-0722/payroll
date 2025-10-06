@@ -384,9 +384,9 @@ async function refreshAttendance() {
 
     data.forEach(r => {
       const dateOnly = r.date ? r.date.split('T')[0] : '-';
-      const timeInFormatted = formatTime12Hour(r.time_in);
-      const timeOutFormatted = formatTime12Hour(r.time_out);
-      const workingHours = calculateWorkingHours(r.time_in, r.time_out);
+      const timeInFormatted = r.time_in || '-';
+      const timeOutFormatted = r.time_out || '-';
+      const workingHours = r.working_hours || '-';
       const status = r.status || '-';
 
       const tr = document.createElement('tr');
@@ -403,6 +403,7 @@ async function refreshAttendance() {
     console.error('Failed to refresh attendance:', error);
   }
 }
+
 
 // Initial load
 refreshAttendance();
