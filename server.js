@@ -97,7 +97,7 @@ app.post('/api/attendance/checkin', auth, async (req, res) => {
   else if (hour >= 13) status = "Absent";
 
   await db.query("INSERT INTO attendance(user_id, date, time_in, status) VALUES (?, ?, ?, ?)", [userId, today, timeNow, status]);
-  res.json({ ok: true });
+  res.json({ ok: true, time_in: formatTime12Hour(now), status });
 });
 
 app.post('/api/attendance/checkout', auth, async (req, res) => {
@@ -106,7 +106,7 @@ app.post('/api/attendance/checkout', auth, async (req, res) => {
   const timeNow = new Date().toTimeString().slice(0, 8); // 24-hr for DB
 
   await db.query("UPDATE attendance SET time_out=? WHERE user_id=? AND date=?", [timeNow, userId, today]);
-  res.json({ ok: true });
+  res.json({ ok: true, time_out: formatTime12Hour(new Date()) });
 });
 
 app.get('/api/attendance/mine', auth, async (req, res) => {
