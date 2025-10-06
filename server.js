@@ -117,16 +117,18 @@ app.get('/api/attendance/mine', auth, async (req, res) => {
     const timeIn = row.time_in ? formatTime12Hour(new Date(`1970-01-01T${row.time_in}`)) : null;
     const timeOut = row.time_out ? formatTime12Hour(new Date(`1970-01-01T${row.time_out}`)) : null;
 
-    // Calculate working hours
+    // ✅ Calculate working hours in hh:mm:ss format
     let workingHours = '';
     if (row.time_in && row.time_out) {
       const inTime = new Date(`1970-01-01T${row.time_in}`);
       const outTime = new Date(`1970-01-01T${row.time_out}`);
       const diffMs = outTime - inTime;
       if (diffMs > 0) {
-        const hours = Math.floor(diffMs / (1000 * 60 * 60));
-        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        workingHours = `${hours}h ${minutes}m`;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        workingHours = `${hours}:${minutes}:${seconds} Hrs`;
       }
     }
 
@@ -141,6 +143,7 @@ app.get('/api/attendance/mine', auth, async (req, res) => {
 
   res.json(formatted);
 });
+
 
 // Leave
 app.post('/api/leave/apply', auth, async (req, res) => {
