@@ -69,28 +69,41 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'adm
 app.get('/employee', (req, res) => res.sendFile(path.join(__dirname, 'public', 'employee.html')));
 
 // ====================== EMPLOYEE ROUTES ======================
+
+// Helper to convert time to 12-hour format with AM/PM
+function formatTime12Hour(date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 becomes 12
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
+}
+
 // Attendance
 app.post('/api/attendance/checkin', auth, async (req, res) => {
   const userId = req.session.user.id;
-  const today = new Date().toISOString().slice(0,10);
-  const timeNow = new Date().toTimeString().slice(0,8);
+  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const timeNow = now.toTimeString().slice(0, 8); // "HH:MM:SS" (24-hr format for DB)
 
   const [rows] = await db.query("SELECT * FROM attendance WHERE user_id=? AND date=?", [userId, today]);
   if (rows.length) return res.json({ error: "Already checked in" });
 
   let status = "Present";
-  const hour = new Date().getHours();
+  const hour = now.getHours();
   if (hour >= 10 && hour < 13) status = "Half Day";
   else if (hour >= 13) status = "Absent";
 
-  await db.query("INSERT INTO attendance(user_id,date,time_in,status) VALUES(?,?,?,?)", [userId, today, timeNow, status]);
+  await db.query("INSERT INTO attendance(user_id, date, time_in, status) VALUES (?, ?, ?, ?)", [userId, today, timeNow, status]);
   res.json({ ok: true });
 });
 
 app.post('/api/attendance/checkout', auth, async (req, res) => {
   const userId = req.session.user.id;
-  const today = new Date().toISOString().slice(0,10);
-  const timeNow = new Date().toTimeString().slice(0,8);
+  const today = new Date().toISOString().slice(0, 10);
+  const timeNow = new Date().toTimeString().slice(0, 8); // 24-hr for DB
 
   await db.query("UPDATE attendance SET time_out=? WHERE user_id=? AND date=?", [timeNow, userId, today]);
   res.json({ ok: true });
@@ -99,7 +112,34 @@ app.post('/api/attendance/checkout', auth, async (req, res) => {
 app.get('/api/attendance/mine', auth, async (req, res) => {
   const userId = req.session.user.id;
   const [rows] = await db.query("SELECT * FROM attendance WHERE user_id=? ORDER BY date DESC LIMIT 20", [userId]);
-  res.json(rows);
+
+  const formatted = rows.map(row => {
+    const timeIn = row.time_in ? formatTime12Hour(new Date(`1970-01-01T${row.time_in}`)) : null;
+    const timeOut = row.time_out ? formatTime12Hour(new Date(`1970-01-01T${row.time_out}`)) : null;
+
+    // Calculate working hours
+    let workingHours = '';
+    if (row.time_in && row.time_out) {
+      const inTime = new Date(`1970-01-01T${row.time_in}`);
+      const outTime = new Date(`1970-01-01T${row.time_out}`);
+      const diffMs = outTime - inTime;
+      if (diffMs > 0) {
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        workingHours = `${hours}h ${minutes}m`;
+      }
+    }
+
+    return {
+      date: row.date,
+      time_in: timeIn,
+      time_out: timeOut,
+      working_hours: workingHours,
+      status: row.status
+    };
+  });
+
+  res.json(formatted);
 });
 
 // Leave
