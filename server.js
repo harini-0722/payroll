@@ -222,45 +222,104 @@ app.delete('/api/admin/employees/:username', authAdmin, async (req, res) => {
 
 // Attendance admin
 app.get('/api/admin/attendance', authAdmin, async (req, res) => {
-  const { date, month, employee_id } = req.query;
   try {
+    const { date, month, employee_id } = req.query;
+
+    // Ensure timezone is Indian Standard Time
+    process.env.TZ = 'Asia/Kolkata';
+
+    // CASE 1: Fetch attendance for a specific date (for all employees)
     if (date) {
-      const [employees] = await db.query("SELECT id, full_name FROM users WHERE role='employee' ORDER BY full_name");
-      const [attRecords] = await db.query("SELECT user_id, time_in, time_out, status FROM attendance WHERE date=?", [date]);
+      const [employees] = await db.query(
+        "SELECT id, full_name FROM users WHERE role='employee' ORDER BY full_name"
+      );
+
+      const [attRecords] = await db.query(
+        "SELECT user_id, time_in, time_out, status FROM attendance WHERE date = ?",
+        [date]
+      );
+
       const dayOfWeek = new Date(date).getDay();
+      const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
 
       const result = employees.map(emp => {
         const att = attRecords.find(a => a.user_id === emp.id);
-        let status = (dayOfWeek === 0 || dayOfWeek === 6) ? 'Weekend' : (att?.time_in ? (att.time_in <= '10:00:00' ? 'Present' : 'Half Day') : 'Absent');
-        return { full_name: emp.full_name, date, time_in: att?.time_in || null, time_out: att?.time_out || null, status };
+        let status;
+
+        if (isWeekend) {
+          status = "Weekend";
+        } else if (att && att.time_in) {
+          status = (att.time_in <= '10:00:00') ? "Present" : "Half Day";
+        } else {
+          status = "Absent";
+        }
+
+        return {
+          full_name: emp.full_name,
+          date,
+          time_in: att?.time_in || null,
+          time_out: att?.time_out || null,
+          status
+        };
       });
+
       return res.json(result);
     }
 
+    // CASE 2: Fetch attendance for an employee for a month
     if (month && employee_id) {
       const year = new Date().getFullYear();
       const daysInMonth = new Date(year, month, 0).getDate();
-      const [attRecords] = await db.query("SELECT date, time_in, time_out, status FROM attendance WHERE user_id=? AND MONTH(date)=?", [employee_id, month]);
-      const [emp] = await db.query("SELECT full_name FROM users WHERE id=?", [employee_id]);
-      const empName = emp[0]?.full_name || 'Unknown';
+
+      const [attRecords] = await db.query(
+        "SELECT date, time_in, time_out, status FROM attendance WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ?",
+        [employee_id, month, year]
+      );
+
+      const [emp] = await db.query("SELECT full_name FROM users WHERE id = ?", [employee_id]);
+      const empName = emp[0]?.full_name || "Unknown";
 
       const result = [];
+
       for (let d = 1; d <= daysInMonth; d++) {
-        const dayStr = `${year}-${month.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+        const dayStr = `${year}-${month.toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
         const dayOfWeek = new Date(dayStr).getDay();
-        const att = attRecords.find(a => a.date.toISOString().slice(0,10) === dayStr);
-        let status = (dayOfWeek === 0 || dayOfWeek === 6) ? 'Weekend' : (att?.time_in ? (att.time_in <= '10:00:00' ? 'Present' : 'Half Day') : 'Absent');
-        result.push({ full_name: empName, date: dayStr, time_in: att?.time_in || null, time_out: att?.time_out || null, status });
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+        const att = attRecords.find(a =>
+          a.date.toISOString().slice(0, 10) === dayStr
+        );
+
+        let status;
+        if (isWeekend) {
+          status = "Weekend";
+        } else if (att && att.time_in) {
+          status = (att.time_in <= '10:00:00') ? "Present" : "Half Day";
+        } else {
+          status = "Absent";
+        }
+
+        result.push({
+          full_name: empName,
+          date: dayStr,
+          time_in: att?.time_in || null,
+          time_out: att?.time_out || null,
+          status
+        });
       }
+
       return res.json(result);
     }
 
-    res.status(400).json({ error: "Provide either date or month+employee_id" });
+    // CASE 3: Missing parameters
+    return res.status(400).json({ error: "Provide either date or month + employee_id" });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database error" });
+    console.error("Error in /api/admin/attendance:", err);
+    return res.status(500).json({ error: "Database error" });
   }
 });
+
 
 // Leaves admin
 app.get('/api/admin/leaves', authAdmin, async (req, res) => {
